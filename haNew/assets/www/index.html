@@ -1,43 +1,151 @@
 <!DOCTYPE html>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
-        <link rel="stylesheet" type="text/css" href="css/index.css" />
-        <title>Hello World</title>
-    </head>
-    <body>
-        <div class="app">
-            <h1>Apache Cordova</h1>
-            <h1>hello</h1>
-            <div id="deviceready" class="blink">
-                <p class="event listening">Connecting to Device</p>
-                <p class="event received">Device is Ready</p>
-            </div>
-        </div>
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
-        <script type="text/javascript">
-            app.initialize();
-        </script>
-    </body>
+<head>
+<title>wunderground API</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1"
+	charset="utf-8">
+<link rel="stylesheet"
+	href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script
+	src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+<script>
+    var date;
+    var yesterday;
+    var weather;
+    var temp_c;
+    var humidity;
+    var wind_dir;
+    var wind_mph;
+    var UV;
+    var icon;
+    var icon_url;
+
+
+    jQuery(document).ready(function($) {
+      $.ajax({
+        // 결과를 한글로 받을 수 있다.
+      url : "http://api.wunderground.com/api/694bd68a6fe63b3c/geolookup/conditions/lang:KR/q/Korea/Seoul.json",
+      dataType : "jsonp",
+      success : function(parsed_json) {
+         // location
+         var location = parsed_json.location;
+         var location_s = "<p>country:  "+location.country_name+"</p>";
+         $("#locationinfo").append(location_s);
+         // 관측지에 대한 정보
+               var observ=0;
+        observ = parsed_json.current_observation;
+           var observ_s=0;
+         observ_s = "<p>관측지 주소 전체 : "+observ.display_location.full+"</p>";
+
+        // 날씨정보
+          var weather_s =0;
+         weather_s = "<p>time:  "+observ.observation_time_rfc822+"</p>";
+         weather_s +="<p>weather :  "+observ.weather+"</p>";
+        weather_s +="<p>Temperature(Celsius):  "+observ.temp_c+"</p>";
+        weather_s +="<p>humidity :  "+observ.relative_humidity+"</p>";
+            weather_s +="<p>wind_direction :  "+observ.wind_dir+"</p>";
+         weather_s +="<p>wind_mph (mph):  "+observ.wind_mph+"</p>";
+                weather_s +="<p>UV:  "+observ.UV+"</p>";
+         weather_s +="<p>icon : "+observ.icon+"</p>";
+         weather_s +="<p>icon_url :  "+"<img src='"+observ.icon_url+"'/></p>";
+         
+
+         //db에 넣기 위해 저장해두기
+
+        date=observ.observation_time_rfc822;
+        date=date.substring(5,7);
+        weather=observ.weather;
+         temp_c=observ.temp_c;
+         humidity =observ.relative_humidity;
+         wind_dir =observ.wind_dir;
+         wind_mph =observ.wind_mph;
+         UV =observ.UV;
+         icon =observ.icon;
+         icon_url =observ.icon_url;
+          yesterday=date-1;
+
+         document.getElementById('date').value=date;
+         document.getElementById('weather').value=weather;
+         document.getElementById('temp_c').value =temp_c;
+         document.getElementById('humidity').value =humidity;
+         document.getElementById('wind_dir').value =wind_dir;
+         document.getElementById('wind_mph').value =wind_mph;
+         document.getElementById('UV').value =UV;
+         document.getElementById('icon').value =icon;
+         document.getElementById('icon_url').value =icon_url;
+         $("#today").append(weather_s);
+      }
+      });
+    });
+
+         function goWeather(){
+            var url="http://finfra.com/~tv22/weather.php?date='"+yesterday+"'";
+            location=url;
+         }
+               function goToday(){
+            var url="http://finfra.com/~tv22/myProject.html";
+            location=url;
+         }
+    
+    
+
+     
+    </script>
+</head>
+<body>
+
+	<div data-role="page">
+
+		<div data-role="header">
+			<h1>Weather</h1>
+		</div>
+		<!-- /header -->
+
+		<div data-role="content">
+		
+			<h2>SEOUL</h2>
+		
+
+			<div id="locationinfo">
+				<h3>location</h3>
+			</div>
+
+			<div id="weatherinfo">
+				<h3>weather data</h3>
+				<table border="1">
+					<tr>
+						<td id='today'></td>
+
+					</tr>
+				</table>
+				<form name="form" method="get"
+					action="http://finfra.com/~tv22/today.php">
+					<input type='hidden' id='date' name='date' /> <input type="hidden"
+						id="weather" name="weather" /> <input type="hidden" id="temp_c"
+						name="temp_c" /> <input type="hidden" id="humidity"
+						name="humidity" /> <input type="hidden" id="wind_dir"
+						name="wind_dir" /> <input type="hidden" id="wind_mph"
+						name="wind_mph" /> <input type="hidden" id="UV" name="UV"
+						value="" /> <input type="hidden" id="icon" name="icon" /> <input
+						type="hidden" id="icon_url" name="icon_url" /> <input
+						type="submit" value="save" /></form>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed">
+			<div data-role="navbar">
+				<ul>
+					<li><a href="javascript:goToday();" data-icon="info"
+						class="ui-btn-active">today</a></li>
+					<li><a href="javascript:goWeather();" data-icon="star">yesterday</a></li>
+					<li><a href="tabbar3.html" data-icon="star">forecast</a></li>
+
+				</ul>
+			</div>
+		</div>
+	</div>
+
+
+</body>
 </html>
